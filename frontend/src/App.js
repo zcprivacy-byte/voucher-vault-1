@@ -367,6 +367,37 @@ function App() {
     <div className="App">
       <Toaster position="top-center" richColors />
       
+      {showInstallPrompt && (
+        <div className="install-prompt" data-testid="install-prompt">
+          <div className="install-content">
+            <Ticket size={24} />
+            <div className="install-text">
+              <strong>Install VoucherVault</strong>
+              <span>Add to home screen for quick access</span>
+            </div>
+          </div>
+          <div className="install-actions">
+            <Button
+              data-testid="install-app-btn"
+              onClick={handleInstallApp}
+              size="sm"
+              className="install-btn"
+            >
+              Install
+            </Button>
+            <Button
+              data-testid="dismiss-install-btn"
+              onClick={() => setShowInstallPrompt(false)}
+              size="sm"
+              variant="ghost"
+              className="dismiss-btn"
+            >
+              ×
+            </Button>
+          </div>
+        </div>
+      )}
+      
       <div className="hero-section">
         <Button
           data-testid="settings-btn"
