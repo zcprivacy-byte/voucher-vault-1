@@ -537,15 +537,48 @@ function App() {
                     />
                   </div>
                   
+                  <div className="form-row">
+                    <div className="form-group">
+                      <Label htmlFor="discount_value">Discount Value *</Label>
+                      <Input
+                        id="discount_value"
+                        data-testid="discount-value-input"
+                        required
+                        value={newVoucher.discount_value}
+                        onChange={(e) => setNewVoucher({...newVoucher, discount_value: e.target.value})}
+                        placeholder="e.g., 10, 20, 50"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <Label htmlFor="currency">Currency *</Label>
+                      <Select
+                        value={newVoucher.currency}
+                        onValueChange={(value) => setNewVoucher({...newVoucher, currency: value})}
+                      >
+                        <SelectTrigger data-testid="currency-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CURRENCIES.map(currency => (
+                            <SelectItem key={currency.code} value={currency.code}>
+                              {currency.symbol} {currency.code} - {currency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
                   <div className="form-group">
-                    <Label htmlFor="discount_amount">Discount Amount *</Label>
+                    <Label htmlFor="discount_amount">Discount Type *</Label>
                     <Input
                       id="discount_amount"
                       data-testid="discount-amount-input"
                       required
                       value={newVoucher.discount_amount}
                       onChange={(e) => setNewVoucher({...newVoucher, discount_amount: e.target.value})}
-                      placeholder="e.g., 20% OFF, $10 OFF"
+                      placeholder="e.g., OFF, % OFF, Cashback, Buy 1 Get 1"
                     />
                   </div>
                   
