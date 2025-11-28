@@ -98,6 +98,8 @@ class Voucher(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     brand_name: str
     discount_amount: str
+    discount_value: Optional[str] = None
+    currency: str = "USD"
     voucher_code: str
     expiry_date: str
     store_type: str = "international"  # specific, regional, international
