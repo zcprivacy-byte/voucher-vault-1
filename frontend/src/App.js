@@ -43,6 +43,8 @@ function App() {
   const [newVoucher, setNewVoucher] = useState({
     brand_name: "",
     discount_amount: "",
+    discount_value: "",
+    currency: "USD",
     voucher_code: "",
     expiry_date: "",
     store_type: "international",
