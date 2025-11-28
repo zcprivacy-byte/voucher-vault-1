@@ -200,32 +200,37 @@ async def get_expiring_vouchers(days: int = 7):
 
 @api_router.post("/vouchers/nearby", response_model=List[Voucher])
 async def get_nearby_vouchers(location: LocationCheckIn):
-    """Get vouchers based on region or store name"""
-    vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
-    
+    """Get vouchers based on region or store name using optimized queries"""
     matching_vouchers = []
+    
+    # Build query based on location
+    queries = [{"store_type": "international"}]
+    
+    if location.region:
+        queries.append({
+            "store_type": "regional",
+            "region": {"$regex": location.region, "$options": "i"}
+        })
+    
+    if location.store_name:
+        queries.append({
+            "store_type": "specific",
+            "$or": [
+                {"brand_name": {"$regex": location.store_name, "$options": "i"}},
+                {"store_location": {"$regex": location.store_name, "$options": "i"}}
+            ]
+        })
+    
+    # Execute single query with $or
+    vouchers = await db.vouchers.find(
+        {"$or": queries},
+        {"_id": 0}
+    ).limit(100).to_list(100)
+    
     for voucher in vouchers:
         if isinstance(voucher.get('created_at'), str):
             voucher['created_at'] = datetime.fromisoformat(voucher['created_at'])
-        
-        # International vouchers are always available
-        if voucher.get('store_type') == 'international':
-            matching_vouchers.append(voucher)
-            continue
-        
-        # Regional vouchers - match by region
-        if voucher.get('store_type') == 'regional' and location.region:
-            if voucher.get('region') and location.region.lower() in voucher.get('region', '').lower():
-                matching_vouchers.append(voucher)
-                continue
-        
-        # Specific store vouchers - match by store name or location
-        if voucher.get('store_type') == 'specific' and location.store_name:
-            brand_match = location.store_name.lower() in voucher.get('brand_name', '').lower()
-            location_match = voucher.get('store_location') and location.store_name.lower() in voucher.get('store_location', '').lower()
-            
-            if brand_match or location_match:
-                matching_vouchers.append(voucher)
+        matching_vouchers.append(voucher)
     
     return matching_vouchers
 
