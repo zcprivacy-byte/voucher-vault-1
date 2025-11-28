@@ -73,13 +73,7 @@ function App() {
   const handleAddVoucher = async (e) => {
     e.preventDefault();
     try {
-      const voucherData = {
-        ...newVoucher,
-        latitude: newVoucher.latitude ? parseFloat(newVoucher.latitude) : null,
-        longitude: newVoucher.longitude ? parseFloat(newVoucher.longitude) : null
-      };
-      
-      await axios.post(`${API}/vouchers`, voucherData);
+      await axios.post(`${API}/vouchers`, newVoucher);
       toast.success("Voucher added successfully!");
       setIsAddDialogOpen(false);
       setNewVoucher({
@@ -87,9 +81,9 @@ function App() {
         discount_amount: "",
         voucher_code: "",
         expiry_date: "",
+        store_type: "international",
         store_location: "",
-        latitude: "",
-        longitude: "",
+        region: "",
         category: "",
         description: ""
       });
