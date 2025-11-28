@@ -26,6 +26,63 @@ db = client[os.environ['DB_NAME']]
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+# Initialize scheduler
+scheduler = AsyncIOScheduler()
+
+# Function to check and send reminders
+async def check_and_send_reminders():
+    """Check for expiring vouchers and send reminders"""
+    try:
+        # Get reminder settings
+        settings_doc = await db.reminder_settings.find_one({"id": "reminder_settings"}, {"_id": 0})
+        if not settings_doc:
+            return
+        
+        settings = ReminderSettings(**settings_doc)
+        
+        # Get all vouchers
+        vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
+        
+        current_date = datetime.now(timezone.utc)
+        reminders_to_send = []
+        
+        for voucher in vouchers:
+            try:
+                expiry_date = datetime.fromisoformat(voucher['expiry_date'])
+                days_until_expiry = (expiry_date - current_date).days
+                
+                # Check if we should send a reminder
+                if days_until_expiry in settings.reminder_days and days_until_expiry > 0:
+                    reminders_to_send.append({
+                        'voucher': voucher,
+                        'days_left': days_until_expiry
+                    })
+            except:
+                pass
+        
+        # Log reminders (in production, this would send emails/push notifications)
+        if reminders_to_send:
+            logger.info(f"Found {len(reminders_to_send)} vouchers expiring soon")
+            
+            # Store reminders in database for browser to fetch
+            for reminder in reminders_to_send:
+                await db.pending_reminders.insert_one({
+                    "voucher_id": reminder['voucher']['id'],
+                    "brand_name": reminder['voucher']['brand_name'],
+                    "days_left": reminder['days_left'],
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+        
+        # Update last check time
+        await db.reminder_settings.update_one(
+            {"id": "reminder_settings"},
+            {"$set": {"last_check": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+    except Exception as e:
+        logger.error(f"Error checking reminders: {str(e)}")
+
 # Models
 class Voucher(BaseModel):
     model_config = ConfigDict(extra="ignore")
