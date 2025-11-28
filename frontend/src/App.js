@@ -30,9 +30,9 @@ function App() {
     discount_amount: "",
     voucher_code: "",
     expiry_date: "",
+    store_type: "international",
     store_location: "",
-    latitude: "",
-    longitude: "",
+    region: "",
     category: "",
     description: ""
   });
