@@ -330,6 +330,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .brand-info {
