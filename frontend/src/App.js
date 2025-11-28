@@ -557,6 +557,98 @@ function App() {
               </DialogContent>
             </Dialog>
             
+            <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+              <DialogContent className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Reminder Settings</DialogTitle>
+                  <DialogDescription>
+                    Configure how you want to be reminded about expiring vouchers
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="settings-form">
+                  <div className="settings-section">
+                    <h3 className="settings-heading">Browser Notifications</h3>
+                    <div className="settings-item">
+                      <label className="switch-label">
+                        <input
+                          type="checkbox"
+                          checked={reminderSettings.browser_notifications_enabled}
+                          onChange={(e) => setReminderSettings({...reminderSettings, browser_notifications_enabled: e.target.checked})}
+                        />
+                        <span>Enable browser notifications</span>
+                      </label>
+                      {reminderSettings.browser_notifications_enabled && notificationPermission !== "granted" && (
+                        <Button
+                          data-testid="enable-notifications-btn"
+                          size="sm"
+                          onClick={requestNotificationPermission}
+                          className="enable-notif-btn"
+                        >
+                          <Bell size={16} /> Enable Notifications
+                        </Button>
+                      )}
+                      {notificationPermission === "granted" && (
+                        <span className="permission-granted">✓ Notifications enabled</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="settings-section">
+                    <h3 className="settings-heading">Email Reminders</h3>
+                    <div className="settings-item">
+                      <label className="switch-label">
+                        <input
+                          type="checkbox"
+                          checked={reminderSettings.email_enabled}
+                          onChange={(e) => setReminderSettings({...reminderSettings, email_enabled: e.target.checked})}
+                        />
+                        <span>Enable email reminders</span>
+                      </label>
+                    </div>
+                    {reminderSettings.email_enabled && (
+                      <div className="form-group">
+                        <Label htmlFor="email_address">Email Address</Label>
+                        <Input
+                          id="email_address"
+                          data-testid="email-address-input"
+                          type="email"
+                          value={reminderSettings.email_address}
+                          onChange={(e) => setReminderSettings({...reminderSettings, email_address: e.target.value})}
+                          placeholder="your@email.com"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="settings-section">
+                    <h3 className="settings-heading">Reminder Timing</h3>
+                    <p className="settings-description">Send reminders when vouchers expire in:</p>
+                    <div className="reminder-days-grid">
+                      {[7, 5, 3, 2, 1].map(day => (
+                        <label key={day} className="day-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={reminderSettings.reminder_days.includes(day)}
+                            onChange={() => toggleReminderDay(day)}
+                          />
+                          <span>{day} day{day > 1 ? 's' : ''}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button
+                    data-testid="save-settings-btn"
+                    onClick={handleSaveReminderSettings}
+                    className="submit-btn"
+                  >
+                    Save Settings
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
             <Button 
               data-testid="check-in-btn"
               size="lg" 
