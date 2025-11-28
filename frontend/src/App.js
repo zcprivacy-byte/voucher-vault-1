@@ -58,11 +58,39 @@ function App() {
     checkNotificationPermission();
     checkPendingReminders();
     
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => console.log('SW registered:', registration))
+        .catch(error => console.log('SW registration failed:', error));
+    }
+    
+    // Listen for PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    });
+    
     // Check for reminders every 5 minutes
     const reminderInterval = setInterval(checkPendingReminders, 5 * 60 * 1000);
     
     return () => clearInterval(reminderInterval);
   }, []);
+
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      toast.success('App installed successfully!');
+    }
+    
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
 
   const fetchVouchers = async () => {
     try {
