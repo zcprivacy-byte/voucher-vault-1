@@ -166,8 +166,9 @@ async def create_voucher(voucher_input: VoucherCreate):
     return voucher_obj
 
 @api_router.get("/vouchers", response_model=List[Voucher])
-async def get_vouchers():
-    vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
+async def get_vouchers(skip: int = 0, limit: int = 100):
+    """Get vouchers with pagination"""
+    vouchers = await db.vouchers.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     
     for voucher in vouchers:
         if isinstance(voucher.get('created_at'), str):
