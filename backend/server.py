@@ -31,9 +31,9 @@ class Voucher(BaseModel):
     discount_amount: str
     voucher_code: str
     expiry_date: str
+    store_type: str = "international"  # specific, regional, international
     store_location: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    region: Optional[str] = None
     category: Optional[str] = None
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -43,9 +43,9 @@ class VoucherCreate(BaseModel):
     discount_amount: str
     voucher_code: str
     expiry_date: str
+    store_type: str = "international"
     store_location: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    region: Optional[str] = None
     category: Optional[str] = None
     description: Optional[str] = None
 
