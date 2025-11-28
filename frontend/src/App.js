@@ -687,6 +687,17 @@ function App() {
                         )}
                         
                         <div className="detail-item">
+                          {voucher.redemption_type === 'online' && <Globe size={16} />}
+                          {voucher.redemption_type === 'offline' && <Store size={16} />}
+                          {voucher.redemption_type === 'both' && <Globe size={16} />}
+                          <span>
+                            {voucher.redemption_type === 'online' && 'Online Only'}
+                            {voucher.redemption_type === 'offline' && 'In-Store Only'}
+                            {voucher.redemption_type === 'both' && 'Online & In-Store'}
+                          </span>
+                        </div>
+                        
+                        <div className="detail-item">
                           <MapPin size={16} />
                           <span>
                             {voucher.store_type === 'international' && 'Available Internationally'}
