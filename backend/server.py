@@ -113,6 +113,8 @@ class Voucher(BaseModel):
 class VoucherCreate(BaseModel):
     brand_name: str
     discount_amount: str
+    discount_value: Optional[str] = None
+    currency: str = "USD"
     voucher_code: str
     expiry_date: str
     store_type: str = "international"
