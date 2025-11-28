@@ -33,6 +33,8 @@ function App() {
     reminder_days: [7, 3, 1]
   });
   const [notificationPermission, setNotificationPermission] = useState("default");
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [customDays, setCustomDays] = useState("");
 
   const [newVoucher, setNewVoucher] = useState({
