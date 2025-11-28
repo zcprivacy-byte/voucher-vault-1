@@ -50,24 +50,8 @@ class VoucherCreate(BaseModel):
     description: Optional[str] = None
 
 class LocationCheckIn(BaseModel):
-    latitude: float
-    longitude: float
-    radius_km: float = 5.0
-
-# Helper function to calculate distance
-def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Calculate distance between two coordinates in km using Haversine formula"""
-    R = 6371  # Earth's radius in km
-    
-    lat1_rad = math.radians(lat1)
-    lat2_rad = math.radians(lat2)
-    delta_lat = math.radians(lat2 - lat1)
-    delta_lon = math.radians(lon2 - lon1)
-    
-    a = math.sin(delta_lat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon/2)**2
-    c = 2 * math.asin(math.sqrt(a))
-    
-    return R * c
+    region: Optional[str] = None
+    store_name: Optional[str] = None
 
 # Routes
 @api_router.get("/")
