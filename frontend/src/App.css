@@ -749,18 +749,6 @@
   font-size: 0.875rem;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .remove-chip-btn {
