@@ -234,10 +234,36 @@ function App() {
           <p className="hero-subtitle">Never miss a discount. Store, track, and redeem your vouchers effortlessly.</p>
           
           <div className="hero-actions">
+            <input
+              type="file"
+              id="image-upload"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleImageScan}
+            />
+            
+            <Button 
+              data-testid="scan-voucher-btn"
+              size="lg" 
+              className="scan-voucher-btn"
+              onClick={() => document.getElementById('image-upload').click()}
+              disabled={isScanning}
+            >
+              {isScanning ? (
+                <>
+                  <Upload size={20} className="animate-pulse" /> Scanning...
+                </>
+              ) : (
+                <>
+                  <Camera size={20} /> Scan Receipt/Coupon
+                </>
+              )}
+            </Button>
+            
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button data-testid="add-voucher-btn" size="lg" className="add-voucher-btn">
-                  <Plus size={20} /> Add Voucher
+                  <Plus size={20} /> Add Manually
                 </Button>
               </DialogTrigger>
               <DialogContent className="dialog-content">
