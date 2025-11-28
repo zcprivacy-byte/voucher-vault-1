@@ -1055,7 +1055,12 @@ function App() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="discount-amount">{voucher.discount_amount}</div>
+                      <div className="discount-amount">
+                        {voucher.discount_value && voucher.currency ? 
+                          `${getCurrencySymbol(voucher.currency)}${voucher.discount_value} ${voucher.discount_amount}` : 
+                          voucher.discount_amount
+                        }
+                      </div>
                       <div className="voucher-code">
                         <code>{voucher.voucher_code}</code>
                       </div>
@@ -1145,7 +1150,12 @@ function App() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="discount-amount">{voucher.discount_amount}</div>
+                      <div className="discount-amount">
+                        {voucher.discount_value && voucher.currency ? 
+                          `${getCurrencySymbol(voucher.currency)}${voucher.discount_value} ${voucher.discount_amount}` : 
+                          voucher.discount_amount
+                        }
+                      </div>
                       <div className="voucher-code">
                         <code>{voucher.voucher_code}</code>
                       </div>
@@ -1228,7 +1238,12 @@ function App() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="discount-amount">{voucher.discount_amount}</div>
+                      <div className="discount-amount">
+                        {voucher.discount_value && voucher.currency ? 
+                          `${getCurrencySymbol(voucher.currency)}${voucher.discount_value} ${voucher.discount_amount}` : 
+                          voucher.discount_amount
+                        }
+                      </div>
                       <div className="voucher-code">
                         <code>{voucher.voucher_code}</code>
                       </div>
