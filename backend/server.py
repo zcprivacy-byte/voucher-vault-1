@@ -62,6 +62,22 @@ class LocationCheckIn(BaseModel):
 class ImageScanRequest(BaseModel):
     image_base64: str
 
+class ReminderSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default="reminder_settings")
+    email_enabled: bool = False
+    email_address: Optional[str] = None
+    browser_notifications_enabled: bool = True
+    reminder_days: List[int] = [7, 3, 1]  # Days before expiry to send reminders
+    last_check: Optional[datetime] = None
+
+class ReminderSettingsUpdate(BaseModel):
+    email_enabled: bool
+    email_address: Optional[str] = None
+    browser_notifications_enabled: bool
+    reminder_days: List[int]
+
 # Routes
 @api_router.get("/")
 async def root():
