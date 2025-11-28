@@ -51,6 +51,14 @@ function App() {
     fetchVouchers();
     fetchExpiringVouchers();
     fetchStats();
+    fetchReminderSettings();
+    checkNotificationPermission();
+    checkPendingReminders();
+    
+    // Check for reminders every 5 minutes
+    const reminderInterval = setInterval(checkPendingReminders, 5 * 60 * 1000);
+    
+    return () => clearInterval(reminderInterval);
   }, []);
 
   const fetchVouchers = async () => {
