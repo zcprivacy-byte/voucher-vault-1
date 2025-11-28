@@ -180,6 +180,78 @@ function App() {
     return days;
   };
 
+  const fetchReminderSettings = async () => {
+    try {
+      const response = await axios.get(`${API}/reminder-settings`);
+      setReminderSettings(response.data);
+    } catch (error) {
+      console.error("Failed to fetch reminder settings", error);
+    }
+  };
+
+  const checkNotificationPermission = () => {
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    if ("Notification" in window) {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission === "granted") {
+        toast.success("Browser notifications enabled!");
+      }
+    }
+  };
+
+  const checkPendingReminders = async () => {
+    try {
+      const response = await axios.get(`${API}/pending-reminders`);
+      const reminders = response.data.reminders;
+      
+      if (reminders && reminders.length > 0 && reminderSettings.browser_notifications_enabled) {
+        reminders.forEach(reminder => {
+          showBrowserNotification(
+            `${reminder.brand_name} voucher expiring soon!`,
+            `Your voucher expires in ${reminder.days_left} day(s). Don't miss out!`
+          );
+        });
+      }
+    } catch (error) {
+      console.error("Failed to check pending reminders", error);
+    }
+  };
+
+  const showBrowserNotification = (title, body) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, {
+        body: body,
+        icon: "/favicon.ico",
+        badge: "/favicon.ico"
+      });
+    }
+  };
+
+  const handleSaveReminderSettings = async () => {
+    try {
+      await axios.post(`${API}/reminder-settings`, reminderSettings);
+      toast.success("Reminder settings saved!");
+      setIsSettingsOpen(false);
+    } catch (error) {
+      toast.error("Failed to save settings");
+    }
+  };
+
+  const toggleReminderDay = (day) => {
+    setReminderSettings(prev => {
+      const days = prev.reminder_days.includes(day)
+        ? prev.reminder_days.filter(d => d !== day)
+        : [...prev.reminder_days, day].sort((a, b) => b - a);
+      return { ...prev, reminder_days: days };
+    });
+  };
+
   const handleImageScan = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
