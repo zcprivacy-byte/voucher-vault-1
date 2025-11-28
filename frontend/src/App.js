@@ -309,6 +309,47 @@ function App() {
     }));
   };
 
+  const fetchDriveStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/drive/status`);
+      setDriveStatus(response.data);
+    } catch (error) {
+      console.error("Failed to fetch Drive status", error);
+    }
+  };
+
+  const handleConnectDrive = async () => {
+    try {
+      const response = await axios.get(`${API}/drive/connect`);
+      window.location.href = response.data.authorization_url;
+    } catch (error) {
+      toast.error("Failed to connect to Google Drive");
+    }
+  };
+
+  const handleSyncToDrive = async () => {
+    setIsSyncing(true);
+    try {
+      const response = await axios.post(`${API}/drive/sync`);
+      toast.success(response.data.message);
+      fetchDriveStatus();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to sync to Drive");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleDisconnectDrive = async () => {
+    try {
+      await axios.post(`${API}/drive/disconnect`);
+      toast.success("Google Drive disconnected");
+      setDriveStatus({ connected: false, last_sync: null, voucher_count: 0 });
+    } catch (error) {
+      toast.error("Failed to disconnect Drive");
+    }
+  };
+
   const handleImageScan = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
