@@ -48,10 +48,19 @@ async def check_and_send_reminders():
         
         settings = ReminderSettings(**settings_doc)
         
-        # Get all vouchers
-        vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
-        
+        # Calculate date range for query optimization
         current_date = datetime.now(timezone.utc)
+        max_days = max(settings.reminder_days) if settings.reminder_days else 7
+        threshold_date = current_date + timedelta(days=max_days)
+        
+        # Optimized query - only fetch vouchers expiring within reminder window
+        vouchers = await db.vouchers.find({
+            "expiry_date": {
+                "$gte": current_date.isoformat(),
+                "$lte": threshold_date.isoformat()
+            }
+        }, {"_id": 0}).limit(500).to_list(500)
+        
         reminders_to_send = []
         
         for voucher in vouchers:
