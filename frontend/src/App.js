@@ -164,6 +164,63 @@ function App() {
     return days;
   };
 
+  const handleImageScan = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+    
+    setIsScanning(true);
+    
+    try {
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        
+        try {
+          const response = await axios.post(`${API}/vouchers/scan-image`, {
+            image_base64: base64String
+          });
+          
+          if (response.data.success && response.data.extracted_data) {
+            const extracted = response.data.extracted_data;
+            
+            // Pre-fill the form with extracted data
+            setNewVoucher({
+              brand_name: extracted.brand_name || "",
+              discount_amount: extracted.discount_amount || "",
+              voucher_code: extracted.voucher_code || "",
+              expiry_date: extracted.expiry_date || "",
+              store_type: "international",
+              redemption_type: "both",
+              store_location: "",
+              region: "",
+              category: extracted.category || "",
+              description: extracted.description || ""
+            });
+            
+            setIsAddDialogOpen(true);
+            toast.success("Image scanned! Review and save the voucher.");
+          }
+        } catch (error) {
+          toast.error("Failed to scan image. Please try again.");
+        } finally {
+          setIsScanning(false);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Failed to read image file");
+      setIsScanning(false);
+    }
+  };
+
   return (
     <div className="App">
       <Toaster position="top-center" richColors />
