@@ -110,42 +110,40 @@ function App() {
   const handleCheckIn = async () => {
     setIsCheckingIn(true);
     
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          };
-          setUserLocation(location);
-          
-          try {
-            const response = await axios.post(`${API}/vouchers/nearby`, {
-              latitude: location.latitude,
-              longitude: location.longitude,
-              radius_km: 5.0
-            });
-            setNearbyVouchers(response.data);
-            
-            if (response.data.length > 0) {
-              toast.success(`Found ${response.data.length} voucher(s) near you!`);
-            } else {
-              toast.info("No vouchers available near your location");
-            }
-          } catch (error) {
-            toast.error("Failed to find nearby vouchers");
-          }
-          setIsCheckingIn(false);
-        },
-        (error) => {
-          toast.error("Unable to get your location. Please enable location services.");
-          setIsCheckingIn(false);
-        }
-      );
-    } else {
-      toast.error("Geolocation is not supported by your browser");
+    // Prompt user for store/region info
+    const storeName = prompt("Enter store name or brand (leave empty to search by region):");
+    
+    if (storeName === null) {
       setIsCheckingIn(false);
+      return;
     }
+    
+    let region = null;
+    if (!storeName) {
+      region = prompt("Enter your region/city (e.g., New York, California):");
+      if (region === null) {
+        setIsCheckingIn(false);
+        return;
+      }
+    }
+    
+    try {
+      const response = await axios.post(`${API}/vouchers/nearby`, {
+        store_name: storeName || null,
+        region: region || null
+      });
+      setNearbyVouchers(response.data);
+      
+      if (response.data.length > 0) {
+        toast.success(`Found ${response.data.length} voucher(s) available!`);
+      } else {
+        toast.info("No vouchers available for this location");
+      }
+    } catch (error) {
+      toast.error("Failed to find vouchers");
+    }
+    
+    setIsCheckingIn(false);
   };
 
   const filteredVouchers = vouchers.filter(voucher => 
