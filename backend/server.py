@@ -327,6 +327,58 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@api_router.get("/reminder-settings", response_model=ReminderSettings)
+async def get_reminder_settings():
+    """Get user's reminder settings"""
+    settings_doc = await db.reminder_settings.find_one({"id": "reminder_settings"}, {"_id": 0})
+    
+    if not settings_doc:
+        # Return default settings
+        default_settings = ReminderSettings()
+        return default_settings
+    
+    if isinstance(settings_doc.get('last_check'), str):
+        settings_doc['last_check'] = datetime.fromisoformat(settings_doc['last_check'])
+    
+    return ReminderSettings(**settings_doc)
+
+@api_router.post("/reminder-settings")
+async def update_reminder_settings(settings: ReminderSettingsUpdate):
+    """Update user's reminder settings"""
+    settings_dict = settings.model_dump()
+    
+    await db.reminder_settings.update_one(
+        {"id": "reminder_settings"},
+        {"$set": settings_dict},
+        upsert=True
+    )
+    
+    return {"message": "Reminder settings updated successfully"}
+
+@api_router.get("/pending-reminders")
+async def get_pending_reminders():
+    """Get pending reminders for the user"""
+    reminders = await db.pending_reminders.find({}, {"_id": 0}).to_list(100)
+    
+    # Clear fetched reminders
+    if reminders:
+        await db.pending_reminders.delete_many({})
+    
+    return {"reminders": reminders}
+
+@app.on_event("startup")
+async def startup_event():
+    # Start the scheduler
+    scheduler.add_job(
+        check_and_send_reminders,
+        IntervalTrigger(hours=6),  # Check every 6 hours
+        id='reminder_checker',
+        replace_existing=True
+    )
+    scheduler.start()
+    logger.info("Reminder scheduler started")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    scheduler.shutdown()
     client.close()
