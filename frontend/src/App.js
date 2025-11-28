@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "@/App.css";
 import axios from "axios";
-import { Ticket, MapPin, Bell, Plus, Trash2, Search, TrendingUp, Calendar, Tag } from "lucide-react";
+import { Ticket, MapPin, Bell, Plus, Trash2, Search, TrendingUp, Calendar, Tag, Globe, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
