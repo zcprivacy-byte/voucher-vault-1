@@ -143,6 +143,7 @@ class ReminderSettingsUpdate(BaseModel):
     email_address: Optional[str] = None
     browser_notifications_enabled: bool
     reminder_days: List[int]
+    default_currency: str
 
 # Routes
 @api_router.get("/")
