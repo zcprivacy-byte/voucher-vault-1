@@ -374,6 +374,227 @@ async def get_pending_reminders():
     
     return {"reminders": reminders}
 
+@api_router.get("/drive/connect")
+async def connect_drive():
+    """Initiate Google Drive OAuth flow"""
+    try:
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        frontend_url = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")[0]
+        redirect_uri = f"{frontend_url}/api/drive/callback"
+        
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [redirect_uri]
+                }
+            },
+            scopes=['https://www.googleapis.com/auth/drive.file'],
+            redirect_uri=redirect_uri
+        )
+        
+        authorization_url, state = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent'
+        )
+        
+        # Store state for validation
+        await db.oauth_states.insert_one({
+            "state": state,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"authorization_url": authorization_url}
+    
+    except Exception as e:
+        logger.error(f"Failed to initiate OAuth: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to initiate OAuth: {str(e)}")
+
+@api_router.get("/drive/callback")
+async def drive_callback(code: str, state: str):
+    """Handle Google Drive OAuth callback"""
+    try:
+        # Verify state
+        state_doc = await db.oauth_states.find_one({"state": state})
+        if not state_doc:
+            raise HTTPException(status_code=400, detail="Invalid state")
+        
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        frontend_url = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")[0]
+        redirect_uri = f"{frontend_url}/api/drive/callback"
+        
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [redirect_uri]
+                }
+            },
+            scopes=None,
+            redirect_uri=redirect_uri
+        )
+        
+        flow.fetch_token(code=code)
+        credentials = flow.credentials
+        
+        # Store credentials
+        await db.drive_credentials.update_one(
+            {"user_id": "default"},
+            {"$set": {
+                "user_id": "default",
+                "access_token": credentials.token,
+                "refresh_token": credentials.refresh_token,
+                "token_uri": credentials.token_uri,
+                "client_id": credentials.client_id,
+                "client_secret": credentials.client_secret,
+                "scopes": credentials.scopes,
+                "expiry": credentials.expiry.isoformat() if credentials.expiry else None,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }},
+            upsert=True
+        )
+        
+        # Clean up state
+        await db.oauth_states.delete_one({"state": state})
+        
+        return RedirectResponse(url=f"{frontend_url}?drive_connected=true")
+    
+    except Exception as e:
+        logger.error(f"OAuth callback failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"OAuth failed: {str(e)}")
+
+async def get_drive_service():
+    """Get Google Drive service with auto-refresh credentials"""
+    creds_doc = await db.drive_credentials.find_one({"user_id": "default"})
+    if not creds_doc:
+        return None
+    
+    creds = Credentials(
+        token=creds_doc["access_token"],
+        refresh_token=creds_doc.get("refresh_token"),
+        token_uri=creds_doc["token_uri"],
+        client_id=creds_doc["client_id"],
+        client_secret=creds_doc["client_secret"],
+        scopes=creds_doc["scopes"]
+    )
+    
+    # Auto-refresh if expired
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+        await db.drive_credentials.update_one(
+            {"user_id": "default"},
+            {"$set": {
+                "access_token": creds.token,
+                "expiry": creds.expiry.isoformat() if creds.expiry else None,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+    
+    return build('drive', 'v3', credentials=creds)
+
+@api_router.post("/drive/sync")
+async def sync_to_drive():
+    """Sync vouchers to Google Drive"""
+    try:
+        service = await get_drive_service()
+        if not service:
+            raise HTTPException(status_code=400, detail="Google Drive not connected")
+        
+        # Get all vouchers
+        vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
+        
+        # Convert to JSON
+        data = {
+            "vouchers": vouchers,
+            "synced_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        json_str = json_lib.dumps(data, indent=2, default=str)
+        file_metadata = {
+            'name': 'vouchervault_backup.json',
+            'mimeType': 'application/json'
+        }
+        
+        media = MediaIoBaseUpload(
+            io.BytesIO(json_str.encode('utf-8')),
+            mimetype='application/json',
+            resumable=True
+        )
+        
+        # Check if file exists
+        results = service.files().list(
+            q="name='vouchervault_backup.json' and trashed=false",
+            spaces='drive',
+            fields='files(id, name)'
+        ).execute()
+        
+        files = results.get('files', [])
+        
+        if files:
+            # Update existing file
+            file_id = files[0]['id']
+            service.files().update(
+                fileId=file_id,
+                media_body=media
+            ).execute()
+        else:
+            # Create new file
+            service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields='id'
+            ).execute()
+        
+        # Update sync status
+        await db.sync_status.update_one(
+            {"service": "google_drive"},
+            {"$set": {
+                "service": "google_drive",
+                "last_sync": datetime.now(timezone.utc).isoformat(),
+                "status": "success",
+                "voucher_count": len(vouchers)
+            }},
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "message": f"Synced {len(vouchers)} vouchers to Google Drive",
+            "synced_at": datetime.now(timezone.utc).isoformat()
+        }
+    
+    except Exception as e:
+        logger.error(f"Drive sync failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+@api_router.get("/drive/status")
+async def get_drive_status():
+    """Get Google Drive connection and sync status"""
+    creds_doc = await db.drive_credentials.find_one({"user_id": "default"})
+    sync_doc = await db.sync_status.find_one({"service": "google_drive"})
+    
+    return {
+        "connected": creds_doc is not None,
+        "last_sync": sync_doc.get("last_sync") if sync_doc else None,
+        "voucher_count": sync_doc.get("voucher_count") if sync_doc else 0
+    }
+
+@api_router.post("/drive/disconnect")
+async def disconnect_drive():
+    """Disconnect Google Drive"""
+    await db.drive_credentials.delete_one({"user_id": "default"})
+    await db.sync_status.delete_one({"service": "google_drive"})
+    return {"success": True, "message": "Google Drive disconnected"}
+
 @app.on_event("startup")
 async def startup_event():
     # Start the scheduler
