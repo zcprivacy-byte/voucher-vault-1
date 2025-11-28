@@ -153,6 +153,8 @@ function App() {
       setNewVoucher({
         brand_name: "",
         discount_amount: "",
+        discount_value: "",
+        currency: reminderSettings.default_currency,
         voucher_code: "",
         expiry_date: "",
         store_type: "international",
