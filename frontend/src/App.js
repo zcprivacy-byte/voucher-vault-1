@@ -24,6 +24,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   const [newVoucher, setNewVoucher] = useState({
     brand_name: "",
