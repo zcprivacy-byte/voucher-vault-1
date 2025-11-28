@@ -83,6 +83,7 @@ function App() {
         voucher_code: "",
         expiry_date: "",
         store_type: "international",
+        redemption_type: "both",
         store_location: "",
         region: "",
         category: "",
