@@ -35,6 +35,8 @@ function App() {
   const [notificationPermission, setNotificationPermission] = useState("default");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [driveStatus, setDriveStatus] = useState({ connected: false, last_sync: null, voucher_count: 0 });
+  const [isSyncing, setIsSyncing] = useState(false);
   const [customDays, setCustomDays] = useState("");
 
   const [newVoucher, setNewVoucher] = useState({
