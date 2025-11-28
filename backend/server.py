@@ -179,6 +179,63 @@ async def get_voucher_stats():
         "expiring_soon": expiring_soon
     }
 
+@api_router.post("/vouchers/scan-image")
+async def scan_voucher_image(request: ImageScanRequest):
+    """Scan and extract voucher details from receipt or coupon image"""
+    try:
+        # Initialize LLM chat
+        chat = LlmChat(
+            api_key=os.environ.get('EMERGENT_LLM_KEY'),
+            session_id=f"scan-{datetime.now().timestamp()}",
+            system_message="You are an expert at extracting voucher and coupon information from images. Extract all relevant details accurately."
+        ).with_model("openai", "gpt-4o-mini")
+        
+        # Create image content
+        image_content = ImageContent(image_base64=request.image_base64)
+        
+        # Create message with image
+        user_message = UserMessage(
+            text="""Analyze this receipt or coupon image and extract the following information in JSON format:
+            {
+                "brand_name": "store or brand name",
+                "discount_amount": "discount value (e.g., 20% OFF, $10 OFF)",
+                "voucher_code": "coupon/voucher code if visible",
+                "expiry_date": "expiry date in YYYY-MM-DD format if visible",
+                "category": "product category (e.g., Food, Fashion, Electronics)",
+                "description": "any additional terms or conditions"
+            }
+            
+            If any field is not visible or unclear in the image, set it to null.
+            Return ONLY the JSON object, no additional text.""",
+            file_contents=[image_content]
+        )
+        
+        # Get response from LLM
+        response = await chat.send_message(user_message)
+        
+        # Parse the JSON response
+        import json
+        # Clean the response - remove markdown code blocks if present
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        extracted_data = json.loads(response_text)
+        
+        return {
+            "success": True,
+            "extracted_data": extracted_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error scanning image: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to scan image: {str(e)}")
+
 app.include_router(api_router)
 
 app.add_middleware(
