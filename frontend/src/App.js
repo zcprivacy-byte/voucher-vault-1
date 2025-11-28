@@ -648,18 +648,66 @@ function App() {
                   <div className="settings-section">
                     <h3 className="settings-heading">Reminder Timing</h3>
                     <p className="settings-description">Send reminders when vouchers expire in:</p>
-                    <div className="reminder-days-grid">
-                      {[7, 5, 3, 2, 1].map(day => (
-                        <label key={day} className="day-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={reminderSettings.reminder_days.includes(day)}
-                            onChange={() => toggleReminderDay(day)}
-                          />
-                          <span>{day} day{day > 1 ? 's' : ''}</span>
-                        </label>
-                      ))}
+                    
+                    <div className="quick-select-days">
+                      <p className="subsection-label">Quick Select:</p>
+                      <div className="reminder-days-grid">
+                        {[7, 5, 3, 2, 1].map(day => (
+                          <label key={day} className="day-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={reminderSettings.reminder_days.includes(day)}
+                              onChange={() => toggleReminderDay(day)}
+                            />
+                            <span>{day} day{day > 1 ? 's' : ''}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
+                    
+                    <div className="custom-reminder-input">
+                      <p className="subsection-label">Custom Reminder:</p>
+                      <div className="custom-input-row">
+                        <Input
+                          type="number"
+                          data-testid="custom-days-input"
+                          min="1"
+                          max="365"
+                          value={customDays}
+                          onChange={(e) => setCustomDays(e.target.value)}
+                          placeholder="Enter days (e.g., 10, 14, 30)"
+                          className="custom-days-field"
+                        />
+                        <Button
+                          data-testid="add-custom-reminder-btn"
+                          onClick={addCustomReminderDay}
+                          className="add-custom-btn"
+                          type="button"
+                        >
+                          <Plus size={16} /> Add
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {reminderSettings.reminder_days.length > 0 && (
+                      <div className="active-reminders">
+                        <p className="subsection-label">Active Reminders:</p>
+                        <div className="active-reminders-list">
+                          {reminderSettings.reminder_days.sort((a, b) => b - a).map(day => (
+                            <div key={day} className="active-reminder-chip" data-testid={`reminder-chip-${day}`}>
+                              <span>{day} day{day > 1 ? 's' : ''}</span>
+                              <button
+                                onClick={() => removeReminderDay(day)}
+                                className="remove-chip-btn"
+                                data-testid={`remove-reminder-${day}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <Button
