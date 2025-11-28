@@ -135,6 +135,7 @@ class ReminderSettings(BaseModel):
     email_address: Optional[str] = None
     browser_notifications_enabled: bool = True
     reminder_days: List[int] = [7, 3, 1]  # Days before expiry to send reminders
+    default_currency: str = "USD"
     last_check: Optional[datetime] = None
 
 class ReminderSettingsUpdate(BaseModel):
