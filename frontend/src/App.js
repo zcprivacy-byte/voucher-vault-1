@@ -25,6 +25,14 @@ function App() {
   const [userLocation, setUserLocation] = useState(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [reminderSettings, setReminderSettings] = useState({
+    email_enabled: false,
+    email_address: "",
+    browser_notifications_enabled: true,
+    reminder_days: [7, 3, 1]
+  });
+  const [notificationPermission, setNotificationPermission] = useState("default");
 
   const [newVoucher, setNewVoucher] = useState({
     brand_name: "",
