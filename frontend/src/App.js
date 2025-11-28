@@ -15,6 +15,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const CURRENCIES = [
+  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "INR", symbol: "₹", name: "Indian Rupee" },
+  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+  { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
+  { code: "SGD", symbol: "S$", name: "Singapore Dollar" }
+];
+
+const getCurrencySymbol = (code) => {
+  const currency = CURRENCIES.find(c => c.code === code);
+  return currency ? currency.symbol : code;
+};
+
 function App() {
   const [vouchers, setVouchers] = useState([]);
   const [expiringVouchers, setExpiringVouchers] = useState([]);
