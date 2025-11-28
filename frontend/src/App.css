@@ -303,10 +303,18 @@ body {
   background: white;
   border: none;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
   border-left: 4px solid #66bb6a;
+}
+
+.voucher-card .card-header {
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+}
+
+.voucher-card .card-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
 .voucher-card.expiring {
