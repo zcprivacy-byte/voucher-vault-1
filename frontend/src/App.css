@@ -926,12 +926,6 @@ body {
     grid-template-columns: 1fr;
   }
   
-  .dialog-content {
-    max-height: 85vh;
-    margin: 1rem;
-    max-width: calc(100vw - 2rem);
-  }
-  
   .install-prompt {
     flex-direction: column;
     gap: 0.75rem;
