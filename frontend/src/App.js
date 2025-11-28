@@ -754,6 +754,29 @@ function App() {
                 
                 <div className="settings-form">
                   <div className="settings-section">
+                    <h3 className="settings-heading">Default Currency</h3>
+                    <p className="settings-description">Choose your preferred currency for new vouchers</p>
+                    <div className="form-group">
+                      <Label htmlFor="default_currency">Currency</Label>
+                      <Select
+                        value={reminderSettings.default_currency}
+                        onValueChange={(value) => setReminderSettings({...reminderSettings, default_currency: value})}
+                      >
+                        <SelectTrigger data-testid="default-currency-select" id="default_currency">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CURRENCIES.map(currency => (
+                            <SelectItem key={currency.code} value={currency.code}>
+                              {currency.symbol} {currency.code} - {currency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="settings-section">
                     <h3 className="settings-heading">Browser Notifications</h3>
                     <div className="settings-item">
                       <label className="switch-label">
