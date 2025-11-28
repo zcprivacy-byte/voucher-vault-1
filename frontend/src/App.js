@@ -751,6 +751,61 @@ function App() {
                   </div>
                   
                   <div className="settings-section">
+                    <h3 className="settings-heading">Google Drive Sync</h3>
+                    <p className="settings-description">Backup your vouchers to Google Drive automatically</p>
+                    
+                    {!driveStatus.connected ? (
+                      <Button
+                        data-testid="connect-drive-btn"
+                        onClick={handleConnectDrive}
+                        className="connect-drive-btn"
+                      >
+                        <Cloud size={18} /> Connect Google Drive
+                      </Button>
+                    ) : (
+                      <div className="drive-connected">
+                        <div className="drive-info">
+                          <div className="drive-status">
+                            <Cloud size={20} className="drive-icon" />
+                            <div>
+                              <strong>Connected to Google Drive</strong>
+                              {driveStatus.last_sync && (
+                                <p className="last-sync">
+                                  Last synced: {new Date(driveStatus.last_sync).toLocaleString()}
+                                  <br />
+                                  {driveStatus.voucher_count} voucher(s) backed up
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="drive-actions">
+                          <Button
+                            data-testid="sync-drive-btn"
+                            onClick={handleSyncToDrive}
+                            disabled={isSyncing}
+                            className="sync-btn"
+                          >
+                            <RefreshCw size={16} className={isSyncing ? 'spinning' : ''} />
+                            {isSyncing ? 'Syncing...' : 'Sync Now'}
+                          </Button>
+                          
+                          <Button
+                            data-testid="disconnect-drive-btn"
+                            onClick={handleDisconnectDrive}
+                            variant="outline"
+                            size="sm"
+                            className="disconnect-btn"
+                          >
+                            Disconnect
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="settings-section">
                     <h3 className="settings-heading">Reminder Timing</h3>
                     <p className="settings-description">Send reminders when vouchers expire in:</p>
                     
