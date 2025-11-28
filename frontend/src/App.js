@@ -248,43 +248,73 @@ function App() {
                   </div>
                   
                   <div className="form-group">
-                    <Label htmlFor="store_location">Store Location</Label>
-                    <Input
-                      id="store_location"
-                      data-testid="store-location-input"
-                      value={newVoucher.store_location}
-                      onChange={(e) => setNewVoucher({...newVoucher, store_location: e.target.value})}
-                      placeholder="e.g., 123 Main St, New York"
-                    />
+                    <Label>Where can this voucher be used? *</Label>
+                    <div className="radio-group">
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="store-type-international"
+                          name="store_type"
+                          value="international"
+                          checked={newVoucher.store_type === "international"}
+                          onChange={(e) => setNewVoucher({...newVoucher, store_type: e.target.value})}
+                        />
+                        <span>International - Can be used anywhere</span>
+                      </label>
+                      
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="store-type-regional"
+                          name="store_type"
+                          value="regional"
+                          checked={newVoucher.store_type === "regional"}
+                          onChange={(e) => setNewVoucher({...newVoucher, store_type: e.target.value})}
+                        />
+                        <span>Regional - Specific region/city only</span>
+                      </label>
+                      
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="store-type-specific"
+                          name="store_type"
+                          value="specific"
+                          checked={newVoucher.store_type === "specific"}
+                          onChange={(e) => setNewVoucher({...newVoucher, store_type: e.target.value})}
+                        />
+                        <span>Specific Store - One location only</span>
+                      </label>
+                    </div>
                   </div>
                   
-                  <div className="form-row">
+                  {newVoucher.store_type === "regional" && (
                     <div className="form-group">
-                      <Label htmlFor="latitude">Latitude</Label>
+                      <Label htmlFor="region">Region/City *</Label>
                       <Input
-                        id="latitude"
-                        data-testid="latitude-input"
-                        type="number"
-                        step="any"
-                        value={newVoucher.latitude}
-                        onChange={(e) => setNewVoucher({...newVoucher, latitude: e.target.value})}
-                        placeholder="40.7128"
+                        id="region"
+                        data-testid="region-input"
+                        required
+                        value={newVoucher.region}
+                        onChange={(e) => setNewVoucher({...newVoucher, region: e.target.value})}
+                        placeholder="e.g., New York, California, London"
                       />
                     </div>
-                    
+                  )}
+                  
+                  {newVoucher.store_type === "specific" && (
                     <div className="form-group">
-                      <Label htmlFor="longitude">Longitude</Label>
+                      <Label htmlFor="store_location">Store Address *</Label>
                       <Input
-                        id="longitude"
-                        data-testid="longitude-input"
-                        type="number"
-                        step="any"
-                        value={newVoucher.longitude}
-                        onChange={(e) => setNewVoucher({...newVoucher, longitude: e.target.value})}
-                        placeholder="-74.0060"
+                        id="store_location"
+                        data-testid="store-location-input"
+                        required
+                        value={newVoucher.store_location}
+                        onChange={(e) => setNewVoucher({...newVoucher, store_location: e.target.value})}
+                        placeholder="e.g., 123 Main St, New York, NY 10001"
                       />
                     </div>
-                  </div>
+                  )}
                   
                   <div className="form-group">
                     <Label htmlFor="description">Description</Label>
