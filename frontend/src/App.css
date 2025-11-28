@@ -70,6 +70,32 @@
   flex-wrap: wrap;
 }
 
+.scan-voucher-btn {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.scan-voucher-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+}
+
+.scan-voucher-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .add-voucher-btn {
   background: white;
   color: #2e7d32;
