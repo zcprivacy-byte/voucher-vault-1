@@ -245,34 +245,48 @@ async def delete_voucher(voucher_id: str):
 
 @api_router.get("/vouchers/stats")
 async def get_voucher_stats():
-    """Get statistics about vouchers"""
-    all_vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
+    """Get statistics about vouchers using aggregation"""
+    current_date = datetime.now(timezone.utc).isoformat()
+    threshold_date = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
     
-    current_date = datetime.now(timezone.utc)
+    # Use aggregation for better performance
+    pipeline = [
+        {
+            "$facet": {
+                "total": [{"$count": "count"}],
+                "expired": [
+                    {"$match": {"expiry_date": {"$lt": current_date}}},
+                    {"$count": "count"}
+                ],
+                "expiring_soon": [
+                    {"$match": {
+                        "expiry_date": {
+                            "$gte": current_date,
+                            "$lte": threshold_date
+                        }
+                    }},
+                    {"$count": "count"}
+                ],
+                "active": [
+                    {"$match": {"expiry_date": {"$gt": threshold_date}}},
+                    {"$count": "count"}
+                ]
+            }
+        }
+    ]
     
-    total = len(all_vouchers)
-    expired = 0
-    expiring_soon = 0
-    active = 0
+    result = await db.vouchers.aggregate(pipeline).to_list(1)
     
-    for voucher in all_vouchers:
-        try:
-            expiry_date = datetime.fromisoformat(voucher['expiry_date'])
-            if expiry_date < current_date:
-                expired += 1
-            elif expiry_date <= current_date + timedelta(days=7):
-                expiring_soon += 1
-            else:
-                active += 1
-        except:
-            pass
+    if result:
+        stats = result[0]
+        return {
+            "total": stats["total"][0]["count"] if stats["total"] else 0,
+            "active": stats["active"][0]["count"] if stats["active"] else 0,
+            "expired": stats["expired"][0]["count"] if stats["expired"] else 0,
+            "expiring_soon": stats["expiring_soon"][0]["count"] if stats["expiring_soon"] else 0
+        }
     
-    return {
-        "total": total,
-        "active": active,
-        "expired": expired,
-        "expiring_soon": expiring_soon
-    }
+    return {"total": 0, "active": 0, "expired": 0, "expiring_soon": 0}
 
 @api_router.post("/vouchers/scan-image")
 async def scan_voucher_image(request: ImageScanRequest):
