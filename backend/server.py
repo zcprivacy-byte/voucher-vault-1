@@ -632,6 +632,16 @@ async def disconnect_drive():
 
 @app.on_event("startup")
 async def startup_event():
+    # Create database indexes for better performance
+    try:
+        await db.vouchers.create_index("expiry_date")
+        await db.vouchers.create_index("store_type")
+        await db.vouchers.create_index("region")
+        await db.vouchers.create_index("brand_name")
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Index creation warning (may already exist): {str(e)}")
+    
     # Start the scheduler
     scheduler.add_job(
         check_and_send_reminders,
