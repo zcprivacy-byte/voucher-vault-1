@@ -250,6 +250,47 @@ function App() {
                   </div>
                   
                   <div className="form-group">
+                    <Label>How can this voucher be redeemed? *</Label>
+                    <div className="radio-group">
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="redemption-type-both"
+                          name="redemption_type"
+                          value="both"
+                          checked={newVoucher.redemption_type === "both"}
+                          onChange={(e) => setNewVoucher({...newVoucher, redemption_type: e.target.value})}
+                        />
+                        <span>Both Online & Offline</span>
+                      </label>
+                      
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="redemption-type-online"
+                          name="redemption_type"
+                          value="online"
+                          checked={newVoucher.redemption_type === "online"}
+                          onChange={(e) => setNewVoucher({...newVoucher, redemption_type: e.target.value})}
+                        />
+                        <span>Online Only</span>
+                      </label>
+                      
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          data-testid="redemption-type-offline"
+                          name="redemption_type"
+                          value="offline"
+                          checked={newVoucher.redemption_type === "offline"}
+                          onChange={(e) => setNewVoucher({...newVoucher, redemption_type: e.target.value})}
+                        />
+                        <span>Offline/In-Store Only</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
                     <Label>Where can this voucher be used? *</Label>
                     <div className="radio-group">
                       <label className="radio-label">
