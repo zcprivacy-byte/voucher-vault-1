@@ -253,6 +253,29 @@ function App() {
     });
   };
 
+  const addCustomReminderDay = () => {
+    const days = parseInt(customDays);
+    if (days && days > 0 && days <= 365 && !reminderSettings.reminder_days.includes(days)) {
+      setReminderSettings(prev => ({
+        ...prev,
+        reminder_days: [...prev.reminder_days, days].sort((a, b) => b - a)
+      }));
+      setCustomDays("");
+      toast.success(`Added ${days} day reminder`);
+    } else if (reminderSettings.reminder_days.includes(days)) {
+      toast.error("This reminder already exists");
+    } else {
+      toast.error("Please enter a valid number between 1 and 365");
+    }
+  };
+
+  const removeReminderDay = (day) => {
+    setReminderSettings(prev => ({
+      ...prev,
+      reminder_days: prev.reminder_days.filter(d => d !== day)
+    }));
+  };
+
   const handleImageScan = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
