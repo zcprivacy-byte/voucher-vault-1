@@ -340,7 +340,7 @@ function App() {
               onClick={handleCheckIn}
               disabled={isCheckingIn}
             >
-              <MapPin size={20} /> {isCheckingIn ? "Checking..." : "Check-In at Store"}
+              <MapPin size={20} /> {isCheckingIn ? "Searching..." : "Find Available Vouchers"}
             </Button>
           </div>
         </div>
