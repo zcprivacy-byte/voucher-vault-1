@@ -314,6 +314,16 @@ function App() {
       <Toaster position="top-center" richColors />
       
       <div className="hero-section">
+        <Button
+          data-testid="settings-btn"
+          size="icon"
+          variant="ghost"
+          className="settings-btn"
+          onClick={() => setIsSettingsOpen(true)}
+        >
+          <Settings size={24} />
+        </Button>
+        
         <div className="hero-content">
           <div className="hero-icon">
             <Ticket size={48} />
