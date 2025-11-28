@@ -33,6 +33,7 @@ function App() {
     reminder_days: [7, 3, 1]
   });
   const [notificationPermission, setNotificationPermission] = useState("default");
+  const [customDays, setCustomDays] = useState("");
 
   const [newVoucher, setNewVoucher] = useState({
     brand_name: "",
