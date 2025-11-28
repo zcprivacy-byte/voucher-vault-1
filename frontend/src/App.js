@@ -30,7 +30,8 @@ function App() {
     email_enabled: false,
     email_address: "",
     browser_notifications_enabled: true,
-    reminder_days: [7, 3, 1]
+    reminder_days: [7, 3, 1],
+    default_currency: "USD"
   });
   const [notificationPermission, setNotificationPermission] = useState("default");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
