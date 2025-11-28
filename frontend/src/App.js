@@ -474,12 +474,14 @@ function App() {
                           <div className="expired-badge">Expired</div>
                         )}
                         
-                        {voucher.store_location && (
-                          <div className="detail-item">
-                            <MapPin size={16} />
-                            <span>{voucher.store_location}</span>
-                          </div>
-                        )}
+                        <div className="detail-item">
+                          <MapPin size={16} />
+                          <span>
+                            {voucher.store_type === 'international' && 'Available Internationally'}
+                            {voucher.store_type === 'regional' && `${voucher.region || 'Regional'}`}
+                            {voucher.store_type === 'specific' && (voucher.store_location || 'Specific Store')}
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
