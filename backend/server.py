@@ -32,6 +32,7 @@ class Voucher(BaseModel):
     voucher_code: str
     expiry_date: str
     store_type: str = "international"  # specific, regional, international
+    redemption_type: str = "both"  # online, offline, both
     store_location: Optional[str] = None
     region: Optional[str] = None
     category: Optional[str] = None
@@ -44,6 +45,7 @@ class VoucherCreate(BaseModel):
     voucher_code: str
     expiry_date: str
     store_type: str = "international"
+    redemption_type: str = "both"
     store_location: Optional[str] = None
     region: Optional[str] = None
     category: Optional[str] = None
