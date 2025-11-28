@@ -57,6 +57,9 @@ class LocationCheckIn(BaseModel):
     region: Optional[str] = None
     store_name: Optional[str] = None
 
+class ImageScanRequest(BaseModel):
+    image_base64: str
+
 # Routes
 @api_router.get("/")
 async def root():
