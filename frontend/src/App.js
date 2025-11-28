@@ -59,6 +59,7 @@ function App() {
     fetchReminderSettings();
     checkNotificationPermission();
     checkPendingReminders();
+    fetchDriveStatus();
     
     // Register service worker
     if ('serviceWorker' in navigator) {
