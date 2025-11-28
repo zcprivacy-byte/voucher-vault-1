@@ -103,29 +103,34 @@ async def get_expiring_vouchers(days: int = 7):
 
 @api_router.post("/vouchers/nearby", response_model=List[Voucher])
 async def get_nearby_vouchers(location: LocationCheckIn):
-    """Get vouchers for stores near the check-in location"""
+    """Get vouchers based on region or store name"""
     vouchers = await db.vouchers.find({}, {"_id": 0}).to_list(1000)
     
-    nearby_vouchers = []
+    matching_vouchers = []
     for voucher in vouchers:
         if isinstance(voucher.get('created_at'), str):
             voucher['created_at'] = datetime.fromisoformat(voucher['created_at'])
         
-        if voucher.get('latitude') and voucher.get('longitude'):
-            distance = calculate_distance(
-                location.latitude,
-                location.longitude,
-                voucher['latitude'],
-                voucher['longitude']
-            )
+        # International vouchers are always available
+        if voucher.get('store_type') == 'international':
+            matching_vouchers.append(voucher)
+            continue
+        
+        # Regional vouchers - match by region
+        if voucher.get('store_type') == 'regional' and location.region:
+            if voucher.get('region') and location.region.lower() in voucher.get('region', '').lower():
+                matching_vouchers.append(voucher)
+                continue
+        
+        # Specific store vouchers - match by store name or location
+        if voucher.get('store_type') == 'specific' and location.store_name:
+            brand_match = location.store_name.lower() in voucher.get('brand_name', '').lower()
+            location_match = voucher.get('store_location') and location.store_name.lower() in voucher.get('store_location', '').lower()
             
-            if distance <= location.radius_km:
-                voucher['distance'] = round(distance, 2)
-                nearby_vouchers.append(voucher)
+            if brand_match or location_match:
+                matching_vouchers.append(voucher)
     
-    # Sort by distance
-    nearby_vouchers.sort(key=lambda x: x.get('distance', 999))
-    return nearby_vouchers
+    return matching_vouchers
 
 @api_router.delete("/vouchers/{voucher_id}")
 async def delete_voucher(voucher_id: str):
